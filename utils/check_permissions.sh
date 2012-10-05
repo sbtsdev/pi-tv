@@ -4,4 +4,4 @@ chmod -R 750 ../../missions-tv/
 
 # Uploads
 chown -R www-data:www-data ../uploads/
-chmod -R 666 ../uploads/
+chmod -R 774 ../uploads/
