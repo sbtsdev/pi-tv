@@ -1,4 +1,4 @@
-#!/bash/sh
+#!/bin/bash
 chown -R deploy:www-data ../../missions-tv/
 chmod -R 750 ../../missions-tv/
 
