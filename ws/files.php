@@ -11,6 +11,8 @@ function do_web_action( $action ) {
 		if ( count( $return_json['files'] ) > 0 ) {
 			$return_json['success'] = true;
 			$return_json['message'] = 'Retrieved ' . count( $return_json['files'] ) . ' files.';
+		} else {
+			$return_json['message'] = 'No files found.';
 		}
 	} else if ( $action === 'get_next' ) {
 		if ( isset( $_REQUEST['current'] ) ) { // just check if it's set, could be zero length for first image
