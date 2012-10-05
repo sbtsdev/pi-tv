@@ -13,11 +13,6 @@
 		},
 		progress = document.getElementById('uploadprogress');
 
-	if ((tests.filereader === false) || (tests.formdata === false) || (tests.dnd === false)) {
-		$('.fallbacks').css('display', 'block');
-		$('.space-age').css('display', 'none');
-	}
-
 	function progress_handler(e){
 		if(e.lengthComputable){
 			$('progress').attr('value', e.total / e.loaded * 100);
@@ -104,6 +99,11 @@
 
 			});
 		}
+	}
+
+	if ((tests.filereader === false) || (tests.formdata === false) || (tests.dnd === false)) {
+		$('.fallbacks').css('display', 'block');
+		$('.space-age').css('display', 'none');
 	}
 
 	if (tests.dnd) {

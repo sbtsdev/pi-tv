@@ -2,4 +2,4 @@ Simple idea, display slider-like images in a top panel and incrementing numbers 
 
 An admin interface is also supplied to allow users to easily add images to the already-running site.
 
-Note that the admin/.htaccess file contains a link to a passwords file not included in the repository.
+Note that the admin/.htaccess file contains a link to a passwords file not included in the repository. To create a file like it use "htpasswd -c /path/to/your/version/bevins_passwords someUserName" at the terminal.
