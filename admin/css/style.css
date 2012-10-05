@@ -1,0 +1,13 @@
+.wrapper {width:400px;margin:0 auto;}
+#holder { border: 10px dashed #ccc; width: 300px; min-height: 300px; margin: 20px auto;}
+#holder.hover { border: 10px dashed #0c0; }
+#holder img { display: block; margin: 10px auto; }
+#holder p { margin: 10px; font-size: 14px; }
+progress { width: 100%; }
+progress:after { content: '%'; }
+.fallbacks {display:none !important;}
+.space-age {display:block;}
+.file-list {width:100%;}
+.file-list-img {display:block;margin:10px auto;border:1px #ddd solid;}
+.upload-response {color:goldenrod;}
+.error-text {color:crimson;}

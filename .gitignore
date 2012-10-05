@@ -1,0 +1,9 @@
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+uploads/Thumbs.db
+uploads/*.jpg
+uploads/*.png
+uploads/*.gif
+*.psd

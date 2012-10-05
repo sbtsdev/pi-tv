@@ -1,0 +1,5 @@
+AuthType "Basic" 
+AuthName "Authorized Users Only"
+# Development location:
+AuthUserFile /Users/joshuacottrell/bevin_passwords
+Require valid-user
