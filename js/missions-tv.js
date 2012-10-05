@@ -15,9 +15,10 @@
 		nset = nset || {};
 		// assume settings at this point, later retrieve them from the server, offer them to the user to modify, save to server and launch
 		settings = settings || {
-			'delay_image'	: 5000,
-			'delay_stats'	: 1000,
-			'easing'		: 'easeInOutBack',
+			'image_delay'	: 8000,
+			'image_easing'	: 'easeInQuad', // http://easings.net
+			'image_move_time'	: 1500,
+			'stats_delay'	: 1000,
 			// these next two are the world and unreached base populations taken at certain times with a certain growth rate
 			'base_world'	: {
 								'time'	: new Date(2012, 9, 2, 13, 43, 0), // month is zero based
@@ -46,7 +47,8 @@
 			'image_wrap'		: 'image-wrap', // jquery reference to wrapper for all images
 			'image_loc'			: 'image',		// jquery reference to image area
 			'stats_loc_world'	: 'world-pop',	// jquery reference to stats area
-			'stats_loc_ureach'	: 'ureach-pop'	// jquery reference to stats area
+			'stats_loc_ureach'	: 'ureach-pop',	// jquery reference to stats area
+			'image_height'		: 0.71
 		};
 		dt = new Date();			// the date/time of the last time the loop ran
 		if (image_timeout) {
@@ -70,14 +72,14 @@
 	function update_image() {
 		if (!reset) {
 			get_next_image(display_image);
-			image_timeout = setTimeout(update_image, settings.delay_image);
+			image_timeout = setTimeout(update_image, settings.image_delay);
 		}
 	}
 
 	function update_stats() {
 		if (!reset) {
 			get_next_stats(display_stats);
-			stats_timeout = setTimeout(update_stats, settings.delay_stats);
+			stats_timeout = setTimeout(update_stats, settings.stats_delay);
 		}
 	}
 
@@ -142,11 +144,11 @@
 		var ht, jq_new_img;
 		jq_new_img = $(document.createElement('div'))
 						.addClass(template.image_loc)
-						.append('<img src="' + current_img + '" width="' + win.innerWidth + '" height="' + win.innerHeight + '" />' )
+						.append('<img src="' + current_img + '" width="' + win.innerWidth + '" height="' + (win.innerHeight * template.image_height) + '" />' )
 						.appendTo('.'+template.image_wrap);
 		ht = jq_new_img.outerHeight(true);
 		if ($('.'+template.image_loc).length > 1) {
-			$('.'+template.image_wrap).animate({ top: '-=' + ht + 'px' }, 4000, settings.easing, function () {
+			$('.'+template.image_wrap).animate({ top: '-=' + ht + 'px' }, settings.image_move_time, settings.image_easing, function () {
 				if ($('.'+template.image_loc).length > 3) {
 					var first_img = $(this).children('.'+template.image_loc).first(),
 						rm_ht = parseInt($(this).css('top'), 10) + first_img.outerHeight(true); // add because top is negative and we want it to go to zero
