@@ -101,6 +101,8 @@
 								if (rjson && rjson.reset) {
 									reset = true;
 									load_settings(rjson.settings); // reset everything
+								}else if (rjson && rjson.reload) {
+									win.location.reload();
 								} else {
 									if (rjson && rjson.success) {
 										current_img = rjson.next;
