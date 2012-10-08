@@ -123,7 +123,7 @@
 	function get_next_stats(stats_ready_func) {
 		update_js_dt();
 		current_world_pop = Math.round((dt.getTime() - settings.base_world.time.getTime()) / 1000 * settings.base_world.rate) + settings.base_world.pop;
-		current_ureach_pop = Math.round((dt.getTime() - settings.base_world.time.getTime()) / 1000 * settings.base_ureach.rate) + settings.base_ureach.pop;
+		current_ureach_pop = Math.round((dt.getTime() - settings.base_ureach.time.getTime()) / 1000 * settings.base_ureach.rate) + settings.base_ureach.pop;
 		stats_ready_func();
 	}
 
