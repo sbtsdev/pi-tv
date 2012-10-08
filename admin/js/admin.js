@@ -14,8 +14,9 @@
 		progress = document.getElementById('uploadprogress');
 
 	function progress_handler(e){
+		var perc = e.total / e.loaded * 100;
 		if(e.lengthComputable){
-			$('progress').attr('value', e.total / e.loaded * 100);
+			$('#uploadprogress>span').css('width', perc + '%');
 		}
 	}
 
@@ -30,10 +31,11 @@
 	}
 
 	function display_message(message, error) {
+		var msg_wrap = $('<p>').text(message);
 		if (error) {
-			$('.upload-response').addClass('error-text').text(message);
+			$('.upload-response').addClass('error-text').append(msg_wrap);
 		} else {
-			$('.upload-response').removeClass('error-text').text(message);
+			$('.upload-response').removeClass('error-text').append(msg_wrap);
 		}
 	}
 
@@ -70,6 +72,7 @@
 			form_data.append('action', 'upload_files');
 			form_data.append('from', 'admin');
 
+			$('#uploadprogress>span').css('width', '0%');
 			$.ajax({
 				'url'		:	'../ws/files.php',
 				'type'		:	'post',
@@ -83,9 +86,16 @@
 								return myXHR;
 				},
 				'success'	:	function (rjson) {
+									var i = 0, up_len;
 									if (rjson && rjson.success) {
 										get_images(display_images);
 										display_message(rjson.message, false);
+										if (rjson.uploaded) {
+											up_len = rjson.uploaded.length;
+											for(;i < up_len; i += 1) {
+												display_message(rjson.uploaded[i].replace('../uploads/', ''), false);
+											}
+										}
 									} else if (rjson && rjson.success === false) {
 										display_message(rjson.message + rjson.failed.join(', '));
 									}
