@@ -126,6 +126,7 @@
 				'data'		:	form_data,
 				'dataType'	:	'json',
 				'success'	:	function (rjson) {
+									var i = 0;
 									if (rjson && rjson.success) {
 										get_images(display_images);
 										display_message(rjson.message, false);
