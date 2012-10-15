@@ -144,7 +144,7 @@
 		var ht, jq_new_img;
 		jq_new_img = $(document.createElement('div'))
 						.addClass(template.image_loc)
-						.append('<img src="' + current_img + '" width="' + win.innerWidth + '" height="' + (win.innerHeight * template.image_height) + '" />' )
+						.append('<img src="' + current_img + '" width="' + win.innerWidth + '" height="' + Math.round(win.innerHeight * template.image_height) + '" />' )
 						.appendTo('.'+template.image_wrap);
 		ht = jq_new_img.outerHeight(true);
 		if ($('.'+template.image_loc).length > 1) {

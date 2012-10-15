@@ -31,14 +31,29 @@ function do_web_action( $action ) {
 	} else if ( $action === 'upload_files' ) {
 		$files = upload_files( $from_web );
 		$file_total = is_array( $_FILES['file']['name'] ) ? count( $_FILES['file']['name'] ) : 1;
-		$return_json['success'] = $file_total === count( $files['uploaded'] );
-		if ( count( $files['uploaded'] ) > 0 ) {
+		$return_json['success'] = $file_total === count( $files['files'] );
+		if ( count( $files['files'] ) > 0 ) {
 			if ( $return_json['success'] ) {
 				$return_json['message'] = 'All files uploaded successfully.';
 			} else {
 				$return_json['message'] = 'Only some files uploaded successfully.';
 			}
-			$return_json['uploaded'] = $files['uploaded'];
+			$return_json['files'] = $files['files'];
+			$return_json['failed'] = $files['failed'];
+		} else {
+			$return_json['message'] = 'Unable to upload.';
+		}
+	} else if ( $action === 'delete_files' ) {
+		$files = delete_files( $from_web );
+		$file_total = is_array( $_REQUEST['file'] ) ? count( $_REQUEST['file'] ) : 1;
+		$return_json['success'] = $file_total === count( $files['files'] );
+		if ( count( $files['files'] ) > 0 ) {
+			if ( $return_json['success'] ) {
+				$return_json['message'] = 'All files deleted successfully.';
+			} else {
+				$return_json['message'] = 'Only some files deleted successfully.';
+			}
+			$return_json['files'] = $files['files'];
 			$return_json['failed'] = $files['failed'];
 		} else {
 			$return_json['message'] = 'Unable to upload.';
@@ -81,11 +96,29 @@ function get_next( $current, $from_web = false ) {
 function upload_files( $from_web ) {
 	global $relative_upload_directory;
 	$upload_directory = dirname( dirname( __FILE__ ) ) . '/' . $relative_upload_directory;
-	$files = array( 'uploaded' => array(), 'failed' => array() );
+	$files = array( 'files' => array(), 'failed' => array() );
 	foreach ( $_FILES['file']['name'] as $index => $fname ) {
 		if ( in_array( substr( $fname, -4 ), array( '.jpg', '.png', '.gif' ) ) && in_array( $_FILES['file']['type'][$index], array( 'image/png', 'image/jpeg', 'image/gif' ) ) ) {
 			if ( move_uploaded_file( $_FILES['file']['tmp_name'][$index], $upload_directory . $fname ) ) {
-				$files['uploaded'][] = ( $from_web ? '' : '../' ) . $relative_upload_directory . $fname;
+				$files['files'][] = ( $from_web ? '' : '../' ) . $relative_upload_directory . $fname;
+			} else {
+				$files['failed'][] = $fname;
+			}
+		} else {
+			$files['failed'][] = $fname;
+		}
+	}
+	return $files;
+}
+
+function delete_files( $from_web ) {
+	global $relative_upload_directory;
+	$upload_directory = dirname( dirname( __FILE__ ) ) . '/' . $relative_upload_directory;
+	$files = array( 'files' => array(), 'failed' => array() );
+	foreach ( $_REQUEST['file'] as $index => $fname ) {
+		if ( in_array( substr( $fname, -4 ), array( '.jpg', '.png', '.gif' ) ) ) {
+			if ( unlink( $upload_directory . $fname ) ) {
+				$files['files'][] = ( $from_web ? '' : '../' ) . $relative_upload_directory . $fname;
 			} else {
 				$files['failed'][] = $fname;
 			}

@@ -11,7 +11,9 @@
 			'image/jpeg': true,
 			'image/gif': true
 		},
-		progress = document.getElementById('uploadprogress');
+		template = {
+			'img_up'	: Handlebars.compile($('#img_up_tmpl').html())
+		};
 
 	function progress_handler(e){
 		var perc = e.total / e.loaded * 100;
@@ -21,12 +23,16 @@
 	}
 
 	function display_images(files) {
-		var i = 0, files_len = files.length,
-			img_templ = '<img class="file-list-img" width="300px" src="##file##" /><br>',
+		var i = 0, files_len = files.length, tmpl_info = {},
 			file_list = $('.file-list');
 		file_list.children().remove();
 		for (; i < files_len; i += 1) {
-			file_list.append(img_templ.replace('##file##', files[i]));
+			tmpl_info = {
+				'img_src' : files[i],
+				'img_alt' : '',
+				'file_name' : files[i].substr(files[i].lastIndexOf('/') + 1)
+			};
+			file_list.append(template.img_up(tmpl_info));
 		}
 	}
 
@@ -90,14 +96,14 @@
 									if (rjson && rjson.success) {
 										get_images(display_images);
 										display_message(rjson.message, false);
-										if (rjson.uploaded) {
-											up_len = rjson.uploaded.length;
+										if (rjson.files) {
+											up_len = rjson.files.length;
 											for(;i < up_len; i += 1) {
-												display_message(rjson.uploaded[i].replace('../uploads/', ''), false);
+												display_message(rjson.files[i].replace('../uploads/', ''), false);
 											}
 										}
 									} else if (rjson && rjson.success === false) {
-										display_message(rjson.message + rjson.failed.join(', '));
+										display_message(rjson.message + rjson.failed.join(', '), true);
 									}
 				},
 				'error'		:	function (jqXHR, textStatus, errorThrown) {
@@ -106,7 +112,38 @@
 				'cache': false,
 				'contentType': false,
 				'processData': false
+			});
+		}
+	}
 
+	function delete_files(form_data) {
+		if (tests.formdata && (form_data instanceof FormData)) {
+			form_data.append('action', 'delete_files');
+			form_data.append('from', 'admin');
+			$.ajax({
+				'url'		:	'../ws/files.php',
+				'type'		:	'post',
+				'data'		:	form_data,
+				'dataType'	:	'json',
+				'success'	:	function (rjson) {
+									if (rjson && rjson.success) {
+										get_images(display_images);
+										display_message(rjson.message, false);
+										if (rjson.files) {
+											for(del_len = rjson.files.length; i < del_len; i+= 1) {
+												display_message(rjson.files[i].replace('../uploads/', ''), false);
+											}
+										}
+									} else if (rjson && (!rjson.success)) {
+										display_message(rjson.message, true);
+									}
+				},
+				'error'		:	function (jqXHR, textStatus, errorThrown) {
+									display_message(errorThrown, true);
+				},
+				'cache'		: false,
+				'contentType':false,
+				'processData':false
 			});
 		}
 	}
@@ -129,5 +166,41 @@
 			read_files(this.files);
 		};
 	}
+
+	$('.file-list').on('click', '.img-file', function (e) {
+		if ($(this).is(':checked')) {
+			$(this).closest('.img-up').addClass('img-selected');
+		} else {
+			$(this).closest('.img-up').removeClass('img-selected');
+		}
+	});
+
+	$('.file-list').on('click', '.delete-button', function (e) {
+		var form_data;
+		if (tests.formdata && ($(this).data('file_name').length > 0)) {
+			form_data = new FormData();
+			form_data.append('file[]', $(this).data('file_name'));
+			delete_files(form_data);
+		}
+	});
+
+	$('.select-all').on('click', function (e) {
+		var files = $('.img-file');
+		if (files.length > 0) {
+			files.attr('checked', true).closest('.img-up').addClass('img-selected');
+		}
+	});
+
+	$('.delete-selected').on('click', function (e) {
+		var form_data, selected = $('.img-file:checked');
+		if (tests.formdata && (selected.length > 0)) {
+			form_data = new FormData();
+			selected.each(function (i, elem) {
+				form_data.append('file[]', $(this).data('file_name'));
+			});
+			delete_files(form_data);
+		}
+	});
+
 	get_images(display_images);
 }(jQuery));
