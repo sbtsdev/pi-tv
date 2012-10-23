@@ -16,7 +16,7 @@
 		// assume settings at this point, later retrieve them from the server, offer them to the user to modify, save to server and launch
 		settings = settings || {
 			'image_delay'	: 8000,
-			'image_easing'	: 'easeInQuad', // http://easings.net
+			'image_easing'	: 'linear', // http://easings.net
 			'image_move_time'	: 1500,
 			'stats_delay'	: 1000,
 			// these next two are the world and unreached base populations taken at certain times with a certain growth rate
