@@ -1,7 +1,3 @@
-/*
- * TODO
- *		Add transition types or options, especially CSS transitions
- */
 (function ($, win) {
 	var current_img,			// current_img file name
 		image_timeout, stats_timeout, // keep the timeout identifiers so we can cancel them
@@ -16,8 +12,9 @@
 		// assume settings at this point, later retrieve them from the server, offer them to the user to modify, save to server and launch
 		settings = settings || {
 			'image_delay'	: 8000,
+			'image_move'	: 'fadeout', // also make fadeout, right2left, left2right, high2low (in that order I think)
 			'image_easing'	: 'linear', // http://easings.net
-			'image_move_time'	: 1500,
+			'image_move_time'	: 1000,
 			'stats_delay'	: 1000,
 			// these next two are the world and unreached base populations taken at certain times with a certain growth rate
 			'base_world'	: {
@@ -135,28 +132,50 @@
 		}
 	}
 
-	// display the image - straight replace, random transition, css transition, according to the settings, etc.
-	// TODO
-	//		Add setting to dictate what type of easing to do (currently set to 'easeInOutBack')
-	//		Add setting to dictate where the currently viewed image moves to: up, down, left, right
-	//		Move the current_img implementation out to a function that will allow the same function to dictate where the current_img image moves
-	function display_image() {
+	function move_image_low2high (ht) {
+		$('.'+template.image_wrap).animate({ top: '-=' + ht + 'px' }, settings.image_move_time, settings.image_easing, function () {
+			if ($('.'+template.image_loc).length > 3) { // only if there are more than three should we remove the oldest/top-most one
+				var first_img = $(this).children('.'+template.image_loc).first(),
+					rm_ht = parseInt($(this).css('top'), 10) + first_img.outerHeight(true); // add because top is negative and we want it to go to zero
+				first_img.remove(); // remove (1), it's off screen now
+				$(this).css('top', rm_ht); // reset the top to the new top-most image, which is the first one in the hidden space above the visible one
+			}
+		});
+	}
+
+	function move_image_fadeout (jq_new_img) {
+		$('.'+template.image_loc).first().fadeOut(settings.image_move_time, function () {
+			// since we only need two to make fades work, remove the first after it is faded
+			$(this).remove();
+			jq_new_img.removeClass('image-next');
+		});
+	}
+
+	function move_image () {
 		var ht, jq_new_img;
 		jq_new_img = $(document.createElement('div'))
-						.addClass(template.image_loc)
+						.addClass(template.image_loc + ' image-' + settings.image_move + ' image-next')
 						.append('<img src="' + current_img + '" width="' + win.innerWidth + '" height="' + Math.round(win.innerHeight * template.image_height) + '" />' )
 						.appendTo('.'+template.image_wrap);
 		ht = jq_new_img.outerHeight(true);
-		if ($('.'+template.image_loc).length > 1) {
-			$('.'+template.image_wrap).animate({ top: '-=' + ht + 'px' }, settings.image_move_time, settings.image_easing, function () {
-				if ($('.'+template.image_loc).length > 3) {
-					var first_img = $(this).children('.'+template.image_loc).first(),
-						rm_ht = parseInt($(this).css('top'), 10) + first_img.outerHeight(true); // add because top is negative and we want it to go to zero
-					first_img.remove(); // remove (1), it's off screen now
-					$(this).css('top', rm_ht); // reset the top to the new top-most image, which is the first one in the hidden space above the visible one
-				}
-			});
+		if ($('.'+template.image_loc).length > 1) { // make sure there is a place to put the images
+			if (settings.image_move === 'low2hight') {
+				move_image_low2high(ht);
+			} else if (settings.image_move === 'fadeout') {
+				move_image_fadeout(jq_new_img);
+			}
+		} else {
+			jq_new_img.removeClass('image-next');
 		}
+	}
+
+	// display the image - straight replace, random transition, css transition, according to the settings, etc.
+	// TODO
+	//		Add setting to dictate what type of easing to do (currently set to 'linear' see easings.net)
+	//		Add setting to dictate where the currently viewed image moves to: up, down, left, right
+	//		Move the current_img implementation out to a function that will allow the same function to dictate where the current_img image moves
+	function display_image() {
+		move_image();
 	}
 
 	function format_large_number(num) {
