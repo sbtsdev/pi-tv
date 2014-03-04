@@ -3,6 +3,8 @@ body {overflow:hidden;}
 .wrapper {width:100%;height:100%;position:absolute;top:0;left:0;}
 	.image-wrap {width:100%;height:71%;background-color:transparent;position:relative;}
 		.image {margin:0;padding:0;background-color:transparent;}
+		.image-fadeout {position:absolute;top:0;left:0;}
+		.image-next{z-index:-5;}
 		.image>img {display:block;}
 	.stats-wrap {width:100%;height:29%;min-width:1610px;top:71%;position:absolute;background-color:#000;display:table-cell;vertical-align:middle;}
 		.stats {float:left;margin:4% 0 0 2%;font:260% 'Gotham Book',Gotham-Book,Arial;color:#eee;}
