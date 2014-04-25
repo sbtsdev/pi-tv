@@ -1,5 +1,5 @@
 /* template styles */
-body {overflow:hidden;}
+body {overflow:hidden;cursor:none;}
 .wrapper {width:100%;height:100%;position:absolute;top:0;left:0;}
 	.image-wrap {width:100%;height:71%;background-color:transparent;position:relative;}
 		.image {margin:0;padding:0;background-color:transparent;}
