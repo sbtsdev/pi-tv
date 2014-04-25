@@ -4,6 +4,7 @@
 Thumbs.db
 uploads/Thumbs.db
 uploads/*.jpg
+uploads/*.jpeg
 uploads/*.png
 uploads/*.gif
 *.psd
