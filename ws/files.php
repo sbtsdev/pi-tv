@@ -48,6 +48,7 @@ function do_web_action( $action ) {
 			$return_json['failed'] = $files['failed'];
 		} else {
 			$return_json['message'] = 'Unable to upload.';
+			$return_json['failed'] = $files['failed'];
 		}
 	} else if ( $action === 'delete_files' ) {
 		$files = delete_files( $from_web );
