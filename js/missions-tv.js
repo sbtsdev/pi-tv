@@ -25,7 +25,7 @@
 			'image_delay'	: 8000,
 			'image_move'	: 'fadeout',// currently: low2high or fadeout; TODO add right2left, left2right, high2low
 			'image_easing'	: 'linear', // http://easings.net for all but fadeout
-			'image_move_time'	: 500,	// the length of the transition from one image to another
+			'image_move_time'	: 1500,	// the length of the transition from one image to another
 			'stats_delay'	: 1000,		// for templates with stats, how often they update
 			// these next two are the world and unreached base populations taken at certain times with a certain growth rate
 			'base_world'	: {
@@ -80,8 +80,10 @@
 	// update the screen at the proper time
 	function update_image() {
 		if (!reset) {
-			get_next_image(display_image);
-			image_timeout = setTimeout(update_image, settings.image_delay);
+			get_next_image(function () {
+                display_image();
+                image_timeout = setTimeout(update_image, settings.image_delay);
+            });
 		}
 	}
 
