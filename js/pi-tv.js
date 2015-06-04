@@ -93,8 +93,9 @@
         }
         current = images.length - 1;
         previous = images.length;
+        fadeIn(current);
         running = true;
-        flipper();
+        timer = win.setTimeout(flipper, settings.imageTimeout);
     }
     function retrieveImages() {
         var xhr = new XMLHttpRequest();
@@ -172,13 +173,15 @@
     }
     function flipper() {
         nextPair();
-        // handling fading
-        try { // we could possibly encounter an undefined image depending
-              //    on what gets removed and added to the image list
-            fadeOut(previous);
-            fadeIn(current);
-        } catch (e) {
-            nextPair();
+        if (current !== previous) {
+            // handling fading
+            try { // we could possibly encounter an undefined image depending
+                  //    on what gets removed and added to the image list
+                fadeOut(previous);
+                fadeIn(current);
+            } catch (e) {
+                nextPair();
+            }
         }
         // use the time until the next time -previous- is shown to check
         //  to see if it's still valid
