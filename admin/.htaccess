@@ -1,5 +1,5 @@
 AuthType "Basic" 
 AuthName "Authorized Users Only"
 # Development location:
-AuthUserFile /home/pi-tv/passwords
+AuthUserFile /Users/joshuacottrell/bevin_passwords
 Require valid-user

@@ -139,15 +139,26 @@
                     // check to see if this is still a valid image
                     resp = JSON.parse(xhr.response);
                     if (resp.success) {
-                        serverCurSrc = resp.current;
-                        serverNextSrc = resp.next;
-                        // check that the current slide is equal to the one
-                        // the server returns next
-                        if (serverNextSrc !== myNextSrc) {
+                        if (resp.reload) {
+                            win.location.reload();
+                        } else if (resp.reset) {
                             running = false;
+                            removeEvents();
                             win.clearTimeout(timer);
                             removeAllImages();
-                            updateImages();
+                            loadPage();
+                            addEvents();
+                        } else {
+                            serverCurSrc = resp.current;
+                            serverNextSrc = resp.next;
+                            // check that the current slide is equal to the one
+                            // the server returns next
+                            if (serverNextSrc !== myNextSrc) {
+                                running = false;
+                                win.clearTimeout(timer);
+                                removeAllImages();
+                                updateImages();
+                            }
                         }
                     }
                     // allow next check
@@ -223,12 +234,16 @@
         updateImages();
         updateStats();
     }
+    function resizeImagesCaller() {
+        setTimeout(function () {
+            resizeImages();
+        }, 1500);
+    }
     function addEvents() {
-        win.addEventListener('resize', function () {
-            setTimeout(function () {
-                resizeImages();
-            }, 1500);
-        });
+        win.addEventListener('resize', resizeImagesCaller);
+    }
+    function removeEvents() {
+        win.removeEventListener('resize', resizeImagesCaller);
     }
     function resizeImages() {
         var i = 0, len = images.length,

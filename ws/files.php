@@ -7,7 +7,7 @@ function do_web_action( $action ) {
 	$return_json = array(
 					'success' => false,
 					'message' => 'Invalid action',
-					'reset' => false );
+					'reset' => false, 'reload' => false );
 
 	if ( $action === 'get_files' ) {
 		$return_json['files'] = get_files_array( $from_web );
