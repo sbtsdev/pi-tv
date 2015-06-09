@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Bevin Center Admin</title>
+	<title>Pi-TV Upload Admin</title>
 	<link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -34,8 +34,8 @@
 			<label class="file-name-label" for="img_file_name">{{file_name}}</label>
 		</div>
 	</script>
-	<script src="../js/jquery-1.8.1.min.js"></script>
-	<script src="../js/handlebars.js"></script>
+	<script src="js/jquery-2.1.4.min.js"></script>
+	<script src="js/handlebars-v3.0.3.js"></script>
 	<script src="js/admin.js"></script>
 </body>
 </html>
