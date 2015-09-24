@@ -78,7 +78,7 @@ function get_files_array( $from_web = false ) {
 	$files_raw = glob( $directory . '*' );
 	$files_json = array();
 	foreach ( $files_raw as $index => $image_path ) {
-		if ( in_array(	substr( $image_path, -4 ),
+		if ( in_array(	substr( strrchr( $image_path, "." ), 1 ),
 						array( '.jpg', '.jpeg', '.png', '.gif' ) ) ) {
 			$files_json[] = ( $from_web ) ?
 								str_replace( '../', '', $image_path ) :

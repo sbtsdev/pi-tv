@@ -8,6 +8,7 @@ body {overflow:hidden;cursor:none;}
             top:0;
             left:0;
             opacity:0;
+            -webkit-transition:opacity 1s linear;
             transition:opacity 1s linear;
         }
         .image-wrap img.current{opacity:1;}
