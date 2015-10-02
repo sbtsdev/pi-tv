@@ -78,8 +78,7 @@ function get_files_array( $from_web = false ) {
 	$files_raw = glob( $directory . '*' );
 	$files_json = array();
 	foreach ( $files_raw as $index => $image_path ) {
-		if ( in_array(	substr( strrchr( $image_path, "." ), 1 ),
-						array( 'jpg', 'jpeg', 'png', 'gif' ) ) ) {
+		if ( is_valid_file_extension( $image_path ) ) {
 			$files_json[] = ( $from_web ) ?
 								str_replace( '../', '', $image_path ) :
 								$image_path;
@@ -115,11 +114,14 @@ function upload_files( $from_web ) {
 	$upload_directory = dirname( dirname( __FILE__ ) ) . '/' . $relative_upload_directory;
 	$files = array( 'files' => array(), 'failed' => array() );
 	foreach ( $_FILES['file']['name'] as $index => $fname ) {
-		if ( in_array( substr( $fname, -4 ), array( '.jpg', '.jpeg', '.png', '.gif' ) )
+		if ( is_valid_file_extension( $fname )
 			&& in_array( $_FILES['file']['type'][$index],
-						array( 'image/png', 'image/jpeg', 'image/gif' ) ) ) {
+                array( 'image/png', 'image/jpeg', 'image/gif' ) )
+        ) {
 			if ( move_uploaded_file( $_FILES['file']['tmp_name'][$index],
-				$upload_directory . $fname ) ) {
+                $upload_directory . $fname )
+            ) {
+                chmod( $upload_directory . $fname, 0770 );
 				$files['files'][] = ( $from_web ? '' : '../' ) .
 					$relative_upload_directory . $fname;
 			} else {
@@ -132,12 +134,19 @@ function upload_files( $from_web ) {
 	return $files;
 }
 
+function is_valid_file_extension( $file_name ) {
+    return in_array(
+        substr( strrchr( $file_name, "." ), 1 ),
+        array( 'jpg', 'jpeg', 'png', 'gif' )
+    );
+}
+
 function delete_files( $from_web ) {
 	global $relative_upload_directory;
 	$upload_directory = dirname( dirname( __FILE__ ) ) . '/' . $relative_upload_directory;
 	$files = array( 'files' => array(), 'failed' => array() );
 	foreach ( $_REQUEST['file'] as $index => $fname ) {
-		if ( in_array( substr( $fname, -4 ), array( '.jpg', '.jpeg', '.png', '.gif' ) ) ) {
+		if ( is_valid_file_extension( $fname ) ) {
 			if ( unlink( $upload_directory . $fname ) ) {
 				$files['files'][] = ( $from_web ? '' : '../' ) .
 					$relative_upload_directory . $fname;
