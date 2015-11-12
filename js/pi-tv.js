@@ -255,6 +255,10 @@
             images[i].setAttribute('height', height);
         }
     }
+    function reloadPage() {
+        win.location.reload();
+    }
     loadPage();
     addEvents();
+    win.setTimeout(reloadPage, 28800000);
 }(window, document));

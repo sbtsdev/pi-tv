@@ -8,8 +8,8 @@ body {overflow:hidden;cursor:none;}
             top:0;
             left:0;
             opacity:0;
-            -webkit-transition:opacity 1s linear;
-            transition:opacity 1s linear;
+            -webkit-transition:opacity 0.5s linear;
+            transition:opacity 0.5s linear;
         }
         .image-wrap img.current{opacity:1;}
     .stats-wrap {width:100%;height:29%;min-width:1610px;top:71%;position:absolute;background-color:#000;display:table-cell;vertical-align:middle;}
