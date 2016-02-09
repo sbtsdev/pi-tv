@@ -40,7 +40,8 @@ function do_web_action( $action ) {
 		$return_json['success'] = $file_total === count( $files['files'] );
 		if ( count( $files['files'] ) > 0 ) {
 			if ( $return_json['success'] ) {
-				$return_json['message'] = 'All files uploaded successfully.';
+                $number_lang = ( count( $files['files'] ) > 1 ) ? 'All files ' : 'File ';
+				$return_json['message'] = $number_lang . 'uploaded successfully.';
 			} else {
 				$return_json['message'] = 'Only some files uploaded successfully.';
 			}
@@ -56,7 +57,8 @@ function do_web_action( $action ) {
 		$return_json['success'] = $file_total === count( $files['files'] );
 		if ( count( $files['files'] ) > 0 ) {
 			if ( $return_json['success'] ) {
-				$return_json['message'] = 'All files deleted successfully.';
+                $number_lang = ( count( $files['files'] ) > 1 ) ? 'All files ' : 'File ';
+				$return_json['message'] = $number_lang . 'deleted successfully.';
 			} else {
 				$return_json['message'] = 'Only some files deleted successfully.';
 			}
@@ -117,6 +119,7 @@ function upload_files( $from_web ) {
 		if ( is_valid_file_extension( $fname )
 			&& in_array( $_FILES['file']['type'][$index],
                 array( 'image/png', 'image/jpeg', 'image/gif' ) )
+            && is_valid_size( $_FILES['file'], $index )
         ) {
 			if ( move_uploaded_file( $_FILES['file']['tmp_name'][$index],
                 $upload_directory . $fname )
@@ -125,15 +128,30 @@ function upload_files( $from_web ) {
 				$files['files'][] = ( $from_web ? '' : '../' ) .
 					$relative_upload_directory . $fname;
 			} else {
-				$files['failed'][] = $fname;
+				$files['failed'][] = array( 'file' => $fname, 'reason' => 'Server could not upload file' );
 			}
 		} else {
-			$files['failed'][] = $fname;
+			$files['failed'][] = array( 'file' => $fname );
+            $latest = count( $files['failed'] ) - 1;
+            if (! is_valid_file_extension( $fname ) ) {
+                $files['failed'][$latest]['reason'] = 'Invalid file extension';
+            } elseif (! in_array( $_FILES['file']['type'][$index],
+                array( 'image/png', 'image/jpeg', 'image/gif' ) )
+            ) {
+                $files['failed'][$latest]['reason'] = 'Invalid file type';
+            } elseif (! is_valid_size( $_FILES['file'], $index ) ) {
+                $files['failed'][$latest]['reason'] = 'File size too large (max: 8MB)';
+            }
 		}
 	}
 	return $files;
 }
 
+function is_valid_size( $file, $index ) {
+    return is_array( $file['size'] )
+        && ( count( $file['size'] ) > $index )
+        && $file['size'][$index] <= (8 * 1024 * 1024); // 8 MB in bytes
+}
 function is_valid_file_extension( $file_name ) {
     return in_array(
         substr( strrchr( $file_name, "." ), 1 ),
