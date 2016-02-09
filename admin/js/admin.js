@@ -1,53 +1,60 @@
+/* globals Handlebars */
 (function () {
+    'use strict';
 	var holder = document.getElementById('holder'),
+        $progressView = $('#uploadprogress>span'),
+        $fileList = $('.file-list'),
+        $uploadResp = $('.upload-response'),
 		tests = {
-			filereader: typeof FileReader != 'undefined',
+			filereader: typeof FileReader !== 'undefined',
 			dnd: 'draggable' in document.createElement('span'),
 			formdata: !!window.FormData,
-			progress: "upload" in new XMLHttpRequest()
+			progress: 'upload' in new XMLHttpRequest()
 		},
-		accepted_type = {
+		acceptedType = {
 			'image/png': true,
 			'image/jpeg': true,
 			'image/gif': true
 		},
 		template = {
-			'img_up'	: Handlebars.compile($('#img_up_tmpl').html())
+			'imgUp'	: Handlebars.compile($('#img_up_tmpl').html())
 		};
 
-	function progress_handler(e){
+	function progressHandler(e){
 		var perc = e.total / e.loaded * 100;
 		if(e.lengthComputable){
-			$('#uploadprogress>span').css('width', perc + '%');
+			$progressView.css('width', perc + '%');
 		}
 	}
 
-	function display_images(files) {
-		var i = 0, files_len = files.length, tmpl_info = {},
-			file_list = $('.file-list');
-		file_list.children().remove();
-		for (; i < files_len; i += 1) {
-			tmpl_info = {
+	function displayImages(files) {
+		var i = 0, filesLen = files.length, tmplInfo = {};
+		$fileList.children().remove();
+		for (; i < filesLen; i += 1) {
+			tmplInfo = {
 				'img_src' : files[i],
 				'img_alt' : '',
 				'file_name' : files[i].substr(files[i].lastIndexOf('/') + 1)
 			};
-			file_list.append(template.img_up(tmpl_info));
+			$fileList.append(template.imgUp(tmplInfo));
 		}
 	}
 
-	function display_message(message, error) {
-		var msg_wrap = $('<p>').text(message);
+	function displayMessage(message, error) {
+		var $msgWrap = $('<p>').html(message);
 		if (error) {
-			$('.upload-response').addClass('error-text').append(msg_wrap);
-		} else {
-			$('.upload-response').removeClass('error-text').append(msg_wrap);
+            $msgWrap.addClass('error-text');
 		}
+        $uploadResp.append($msgWrap);
 	}
 
-	function get_images(image_displayer) {
+    function clearDisplay() {
+        $uploadResp.html('');
+    }
+
+	function getImages(imageDisplayer) {
 		$.ajax({
-			'url'	: '../ws/files.php',
+			'url'	: '/ws/files.php',
 			'data'	: {
 				'action': 'get_files',
 				'from'	: 'admin'
@@ -55,101 +62,129 @@
 			'dataType'	: 'json',
 			'success'	:	function (rjson) {
 								if (rjson && rjson.success) {
-									image_displayer(rjson.files);
+									imageDisplayer(rjson.files);
 								} else {
-									display_message(rjson.message || "No files returned.", true);
+                                    clearDisplay();
+									displayMessage(rjson.message || 'No files returned.', true);
 								}
 			},
 			'error'	:	function (jqXHR, textStatus, errorThrown) {
-							display_message(errorThrown, true);
+                            clearDisplay();
+							displayMessage(errorThrown, true);
 			}
 		});
 	}
 
-	function read_files(files) {
-		var i = 0, files_len = files.length,
-			form_data = tests.formdata ? new FormData() : null;
+	function readFiles(files) {
+		var i = 0, filesLen = files.length,
+			formData = tests.formdata ? new FormData() : null;
+        clearDisplay();
 		if (tests.formdata) {
-			for (; i < files_len; i++) {
-				if (accepted_type[files[i].type]) {
-					form_data.append('file[]', files[i]);
+			for (; i < filesLen; i+=1) {
+				if (acceptedType[files[i].type]) {
+					formData.append('file[]', files[i]);
 				}
 			}
-			form_data.append('action', 'upload_files');
-			form_data.append('from', 'admin');
+			formData.append('action', 'upload_files');
+			formData.append('from', 'admin');
 
-			$('#uploadprogress>span').css('width', '0%');
+			$progressView.css('width', '0%');
 			$.ajax({
-				'url'		:	'../ws/files.php',
+				'url'		:	'/ws/files.php',
 				'type'		:	'post',
-				'data'		:	form_data,
+				'data'		:	formData,
 				'dataType'	:	'json',
 				'xhr'		:	function () {
 								var myXHR = $.ajaxSettings.xhr();
 								if (myXHR.upload) {
-									myXHR.upload.addEventListener('progress', progress_handler, false);
+									myXHR.upload.addEventListener('progress',
+                                        progressHandler, false);
 								}
 								return myXHR;
 				},
 				'success'	:	function (rjson) {
-									var i = 0, up_len;
-									if (rjson && rjson.success) {
-										get_images(display_images);
-										display_message(rjson.message, false);
+									var i = 0, upLen, tmpFileName;
+									if (rjson && rjson.success !== undefined) {
+										getImages(displayImages);
 										if (rjson.files) {
-											up_len = rjson.files.length;
-											for(;i < up_len; i += 1) {
-												display_message(rjson.files[i].replace('../uploads/', ''), false);
+                                            displayMessage(rjson.message,
+                                                false);
+											upLen = rjson.files.length;
+											for(;i < upLen; i += 1) {
+                                                tmpFileName = rjson.files[i]
+                                                    .replace('../uploads/', '');
+												displayMessage(tmpFileName,
+                                                    false);
 											}
-										}
-									} else if (rjson && rjson.success === false) {
-										display_message(rjson.message + rjson.failed.join(', '), true);
+                                        } else {
+                                            displayMessage(rjson.message, true);
+                                        }
+                                        if (rjson.success === false) {
+                                            var errorFiles = rjson.failed,
+                                                errorMessage = '';
+                                            $.each(errorFiles,
+                                                function (i, val) {
+                                                    errorMessage += val.file +
+                                                        ': ' + val.reason +
+                                                        '<br>';
+                                            });
+                                            displayMessage(errorMessage, true);
+                                        }
+									} else {
+                                        displayMessage('Server did not return',
+                                                true);
 									}
 				},
 				'error'		:	function (jqXHR, textStatus, errorThrown) {
-									display_message(errorThrown, true);
+									displayMessage(errorThrown, true);
 				},
 				'cache': false,
 				'contentType': false,
 				'processData': false
 			});
-		}
+        } else {
+            displayMessage('Your browser is not up to date.', true);
+        }
 	}
 
-	function delete_files(form_data) {
-		if (tests.formdata && (form_data instanceof FormData)) {
-			form_data.append('action', 'delete_files');
-			form_data.append('from', 'admin');
+	function deleteFiles(formData) {
+        clearDisplay();
+		if (tests.formdata && (formData instanceof FormData)) {
+			formData.append('action', 'delete_files');
+			formData.append('from', 'admin');
 			$.ajax({
-				'url'		:	'../ws/files.php',
+				'url'		:	'/ws/files.php',
 				'type'		:	'post',
-				'data'		:	form_data,
+				'data'		:	formData,
 				'dataType'	:	'json',
 				'success'	:	function (rjson) {
-									var i = 0;
+									var i = 0, delLen;
 									if (rjson && rjson.success) {
-										get_images(display_images);
-										display_message(rjson.message, false);
+										getImages(displayImages);
+										displayMessage(rjson.message, false);
 										if (rjson.files) {
-											for(del_len = rjson.files.length; i < del_len; i+= 1) {
-												display_message(rjson.files[i].replace('../uploads/', ''), false);
+											for(delLen = rjson.files.length; i < delLen; i+= 1) {
+												displayMessage(rjson.files[i].replace('../uploads/', ''), false);
 											}
 										}
 									} else if (rjson && (!rjson.success)) {
-										display_message(rjson.message, true);
+										displayMessage(rjson.message, true);
 									}
 				},
 				'error'		:	function (jqXHR, textStatus, errorThrown) {
-									display_message(errorThrown, true);
+									displayMessage(errorThrown, true);
 				},
 				'cache'		: false,
 				'contentType':false,
 				'processData':false
 			});
-		}
+        } else {
+            displayMessage('Your browser is not up to date.', true);
+        }
 	}
 
-	if ((tests.filereader === false) || (tests.formdata === false) || (tests.dnd === false)) {
+	if ((tests.filereader === false) || (tests.formdata === false) ||
+            (tests.dnd === false)) {
 		$('.fallbacks').css('display', 'block');
 		$('.space-age').css('display', 'none');
 	}
@@ -160,15 +195,15 @@
 		holder.ondrop = function (e) {
 			this.className = '';
 			e.preventDefault();
-			read_files(e.dataTransfer.files);
+			readFiles(e.dataTransfer.files);
 		};
 	} else {
 		document.querySelector('input').onchange = function () {
-			read_files(this.files);
+			readFiles(this.files);
 		};
 	}
 
-	$('.file-list').on('click', '.img-file', function (e) {
+	$fileList.on('click', '.img-file', function () {
 		if ($(this).is(':checked')) {
 			$(this).closest('.img-up').addClass('img-selected');
 		} else {
@@ -176,32 +211,32 @@
 		}
 	});
 
-	$('.file-list').on('click', '.delete-button', function (e) {
-		var form_data;
+	$fileList.on('click', '.delete-button', function () {
+		var formData;
 		if (tests.formdata && ($(this).data('file_name').length > 0)) {
-			form_data = new FormData();
-			form_data.append('file[]', $(this).data('file_name'));
-			delete_files(form_data);
+			formData = new FormData();
+			formData.append('file[]', $(this).data('file_name'));
+			deleteFiles(formData);
 		}
 	});
 
-	$('.select-all').on('click', function (e) {
+	$('.select-all').on('click', function () {
 		var files = $('.img-file');
 		if (files.length > 0) {
 			files.attr('checked', true).closest('.img-up').addClass('img-selected');
 		}
 	});
 
-	$('.delete-selected').on('click', function (e) {
-		var form_data, selected = $('.img-file:checked');
+	$('.delete-selected').on('click', function () {
+		var formData, selected = $('.img-file:checked');
 		if (tests.formdata && (selected.length > 0)) {
-			form_data = new FormData();
-			selected.each(function (i, elem) {
-				form_data.append('file[]', $(this).data('file_name'));
+			formData = new FormData();
+			selected.each(function () {
+				formData.append('file[]', $(this).data('file_name'));
 			});
-			delete_files(form_data);
+			deleteFiles(formData);
 		}
 	});
 
-	get_images(display_images);
+	getImages(displayImages);
 }(jQuery));
