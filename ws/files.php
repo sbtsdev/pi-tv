@@ -1,6 +1,9 @@
 <?php
 global $relative_upload_directory;
+global $config;
+
 $relative_upload_directory = 'uploads/';
+$config = require 'config.php';
 
 function do_web_action($action)
 {
@@ -117,6 +120,8 @@ function get_next($current, $from_web = false)
 function upload_files($from_web)
 {
     global $relative_upload_directory;
+    global $config;
+
     $upload_directory = dirname(dirname(__FILE__)) . '/' . $relative_upload_directory;
     $files = array( 'files' => array(), 'failed' => array() );
     foreach ($_FILES['file']['name'] as $index => $fname) {
@@ -150,7 +155,8 @@ function upload_files($from_web)
             ) {
                 $files['failed'][$latest]['reason'] = 'Invalid file type';
             } elseif (! is_valid_size($_FILES['file'], $index)) {
-                $files['failed'][$latest]['reason'] = 'File size too large (max: 8MB)';
+                $files['failed'][$latest]['reason'] = 'File size too large (max: '.
+                    ((string) ($config['max_file_size'] / 1024 / 1024)).'MB)';
             }
         }
     }
@@ -159,9 +165,11 @@ function upload_files($from_web)
 
 function is_valid_size($file, $index)
 {
+    global $config;
+
     return is_array($file['size'])
         && (count($file['size']) > $index)
-        && $file['size'][$index] <= (8 * 1024 * 1024); // 8 MB in bytes
+        && $file['size'][$index] <= $config['max_file_size'];
 }
 function is_valid_file_extension($file_name)
 {

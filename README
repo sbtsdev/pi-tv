@@ -1,5 +1,0 @@
-Simple idea, display slider-like images in a top panel and incrementing numbers below. The numbers are the estimated current world population and the estimated number of people who have not had an adequate chance to hear the gospel.
-
-An admin interface is also supplied to allow users to easily add images to the already-running site.
-
-Note that the admin/.htaccess file contains a link to a passwords file not included in the repository. To create a file like it use "htpasswd -c /path/to/your/version/bevins_passwords someUserName" at the terminal.

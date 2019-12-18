@@ -8,3 +8,5 @@ uploads/*.jpeg
 uploads/*.png
 uploads/*.gif
 *.psd
+vendor/
+ws/config.php
