@@ -11,43 +11,39 @@
         running,    // true/false - whether cycling through images
         timer,      // timeout value to stop timeout when needed
         statsRunning = false,
-        statsTimer,
         dt,         // current date and time (at the last time incremented)
         currentWorldPop,
         currentUnreachPop,
-        checking = false; // checking if next valid image matches
-                    //  the only time we actually know we're not checking
+        // checking if next valid image matches
+        //  the only time we actually know we're not checking
+        checking = false;
     function loadSettings(userSettings) {
         var setting;
         userSettings = userSettings || {};
         settings = settings || {
             'template'  : {
-                'id'            : 'full-tv',    // id of the template (for
-                                                //  retrieval)
-                'imageWrapClass': 'image-wrap', // element that wraps all
-                                                //  the images
-                'imageHeight'       : 1,     // 0.71 for stats template;
-                                                //  1 for full height
-                'imageWidth'        : 1,        // 1 for full width; different
-                                                //  for future templates
+                'id': 'full-tv', // id of the template (for retrieval)
+                'imageWrapClass': 'image-wrap', // element that wraps all the images
+                'imageHeight': 1,// 0.71 for stats template; 1 for full height
+                'imageWidth': 1, // 1 for full width; different for future templates
                 'statsWorldClass'   : 'world-pop',
                 'statsUnReachClass' : 'ureach-pop'
             },
             'imageTimeout': 8000,
             'statsTimeout': 3000,
-			// these next two are the world and unreached base populations
+            // these next two are the world and unreached base populations
             //  taken at certain times with a certain growth rate
-			'baseWorld'	: {
-                                // month is zero based
-								'time'	: new Date(2012, 9, 2, 13, 43, 0),
-								'pop'	: 7043122856,
-								'rate'	: 2.45
-							},
-			'baseUnreached'	: {
-								'time'	: new Date(1999, 4, 4, 0, 0, 0),
-								'pop'	: 2989262347,
-								'rate'	: 1.394
-							}
+            'baseWorld': {
+                // month is zero based
+                'time': new Date(2012, 9, 2, 13, 43, 0),
+                'pop':  7043122856,
+                'rate': 2.45
+            },
+            'baseUnreached': {
+                'time': new Date(1999, 4, 4, 0, 0, 0),
+                'pop':  2989262347,
+                'rate': 1.394
+            }
         };
 
         // merge user settings with defaults (userSettings override, of course)
@@ -131,11 +127,11 @@
                 // use getAttribute so we don't get the whole url
                 myCurSrc = images[slideNumber].getAttribute('src');
                 myNextSrc = images[nextValidIndex(slideNumber)].
-                                getAttribute('src');
+                    getAttribute('src');
                 queryURL += myCurSrc;
                 xhr = new XMLHttpRequest();
                 xhr.onload = function () {
-                    var resp, serverCurSrc, serverNextSrc;
+                    var resp, serverNextSrc;
                     // check to see if this is still a valid image
                     resp = JSON.parse(xhr.response);
                     if (resp.success) {
@@ -149,7 +145,6 @@
                             loadPage();
                             addEvents();
                         } else {
-                            serverCurSrc = resp.current;
                             serverNextSrc = resp.next;
                             // check that the current slide is equal to the one
                             // the server returns next
@@ -175,19 +170,21 @@
         previous = prevValidIndex(current); // in case image is removed
     }
     function fadeOut(slideNumber) {
-        if (images[slideNumber].classList.contains('current')) {
+        if (images[slideNumber] && images[slideNumber].classList.contains('current')) {
             images[slideNumber].classList.remove('current');
         }
     }
     function fadeIn(slideNumber) {
-        images[slideNumber].classList.add('current');
+        if (images[slideNumber]) {
+            images[slideNumber].classList.add('current');
+        }
     }
     function flipper() {
         nextPair();
         if (current !== previous) {
             // handling fading
             try { // we could possibly encounter an undefined image depending
-                  //    on what gets removed and added to the image list
+                //    on what gets removed and added to the image list
                 fadeOut(previous);
                 fadeIn(current);
             } catch (e) {
@@ -202,28 +199,27 @@
         }
     }
     function updateDt() {
-		dt = new Date();
+        dt = new Date();
     }
     function updateStats() {
         if (statsRunning) {
             updateDt();
             currentWorldPop = Math.round(
-                    (dt.getTime() - settings.baseWorld.time.getTime()) / 1000 *
+                (dt.getTime() - settings.baseWorld.time.getTime()) / 1000 *
                     settings.baseWorld.rate) + settings.baseWorld.pop;
             currentUnreachPop = Math.round((dt.getTime() -
                     settings.baseUnreached.time.getTime()) / 1000 *
                     settings.baseUnreached.rate) + settings.baseUnreached.pop;
-            statsTimer = win.setTimeout(updateStats, settings.statsTimeout);
             displayStats();
         }
     }
-	function formatLargeNumber(num) {
-		var nnumStr = num += '', rgx = /(\d+)(\d{3})/;
-		while (rgx.test(nnumStr)) {
-			nnumStr = nnumStr.replace(rgx, '$1' + ',' + '$2');
-		}
-		return nnumStr;
-	}
+    function formatLargeNumber(num) {
+        var nnumStr = num += '', rgx = /(\d+)(\d{3})/;
+        while (rgx.test(nnumStr)) {
+            nnumStr = nnumStr.replace(rgx, '$1' + ',' + '$2');
+        }
+        return nnumStr;
+    }
     function displayStats() {
         statsWorldEl.innerHTML = formatLargeNumber(currentWorldPop);
         statsUnreachEl.innerHTML = formatLargeNumber(currentUnreachPop);
